@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  createdAt     DateTime  @default(now())
+  stores        Store[]
+  products      Product[]
+  purchases     Purchase[]
+  cartItems     CartItem[]
+
+  @@map("users")
+}
+
+model Store {
+  id        String    @id @default(cuid())
+  name      String
+  color     String    @default("#6366f1")
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products  Product[]
+  createdAt DateTime  @default(now())
+
+  @@map("stores")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                   String     @id @default(cuid())
+  name                 String
+  unit                 String     @default("unidad")
+  estimatedDurationDays Int       @default(30)
+  userId               String
+  user                 User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeId              String
+  store                Store      @relation(fields: [storeId], references: [id])
+  categoryId           String?
+  category             Category?  @relation(fields: [categoryId], references: [id])
+  purchases            Purchase[]
+  cartItems            CartItem[]
+  createdAt            DateTime   @default(now())
+
+  @@map("products")
+}
+
+model Purchase {
+  id                 String    @id @default(cuid())
+  purchaseDate       DateTime  @default(now())
+  price              Decimal   @db.Decimal(10, 2)
+  quantity           Int       @default(1)
+  estimatedDurationDays Int
+  projectedRunOutDate  DateTime
+  actualRunOutDate     DateTime?
+  userId             String
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product   @relation(fields: [productId], references: [id])
+  createdAt          DateTime  @default(now())
+
+  @@map("purchases")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  quantity  Int      @default(1)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("cart_items")
+}
