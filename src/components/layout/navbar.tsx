@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Home, BookOpen, BarChart2, CalendarDays, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,8 +13,21 @@ const navItems = [
   { href: "/gastos", label: "Gastos", icon: BarChart2 },
 ];
 
+function UserAvatar({ name }: { name?: string | null }) {
+  const initials = name
+    ? name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+    : "?";
+  return (
+    <div className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0">
+      {initials}
+    </div>
+  );
+}
+
 export function Navbar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const userName = session?.user?.name || session?.user?.email?.split("@")[0];
 
   return (
     <>
@@ -41,7 +54,11 @@ export function Navbar() {
             </Link>
           ))}
         </nav>
-        <div className="p-3 border-t border-gray-100">
+        <div className="p-3 border-t border-gray-100 space-y-1">
+          <div className="flex items-center gap-3 px-3 py-2">
+            <UserAvatar name={userName} />
+            <span className="text-sm font-medium text-gray-700 truncate">{userName}</span>
+          </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
@@ -55,13 +72,16 @@ export function Navbar() {
       {/* Mobile top header */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-100 z-40 flex items-center justify-between px-4">
         <h1 className="text-lg font-bold text-emerald-700">🏠 Mi Alacena</h1>
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors py-1.5 px-2 rounded-lg hover:bg-red-50"
-        >
-          <LogOut className="h-4 w-4" />
-          <span className="text-xs">Salir</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <UserAvatar name={userName} />
+          <span className="text-sm font-medium text-gray-700 max-w-24 truncate">{userName}</span>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex items-center gap-1 text-gray-400 hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </header>
 
       {/* Mobile bottom bar */}
