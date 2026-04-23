@@ -3,13 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Home, BookOpen, ShoppingCart, BarChart2, CalendarDays, LogOut } from "lucide-react";
+import { Home, BookOpen, BarChart2, CalendarDays, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/inventario", label: "Inicio", icon: Home },
   { href: "/menu", label: "Catálogo", icon: BookOpen },
-  { href: "/carrito", label: "Carrito", icon: ShoppingCart },
   { href: "/calendario", label: "Calendario", icon: CalendarDays },
   { href: "/gastos", label: "Gastos", icon: BarChart2 },
 ];

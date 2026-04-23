@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Plus, Store, ShoppingCart, Check } from "lucide-react";
+import { Search, Plus, Store } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -256,21 +256,6 @@ export default function MenuPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedStore, setSelectedStore] = useState("Todas");
-  const [addingIds, setAddingIds] = useState<Set<string>>(new Set());
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-
-  async function addToCart(productId: string) {
-    setAddingIds((prev) => new Set(prev).add(productId));
-    await fetch("/api/cart", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId }),
-    });
-    setAddingIds((prev) => { const s = new Set(prev); s.delete(productId); return s; });
-    setAddedIds((prev) => new Set(prev).add(productId));
-    setTimeout(() => setAddedIds((prev) => { const s = new Set(prev); s.delete(productId); return s; }), 2000);
-  }
-
   function loadProducts() {
     fetch("/api/products")
       .then((r) => r.json())
@@ -366,20 +351,6 @@ export default function MenuPage() {
                   {product.category && (
                     <Badge variant="secondary">{product.category.name}</Badge>
                   )}
-                  <button
-                    onClick={() => addToCart(product.id)}
-                    disabled={addingIds.has(product.id)}
-                    className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${
-                      addedIds.has(product.id)
-                        ? "text-emerald-600 bg-emerald-50"
-                        : "text-gray-400 hover:text-emerald-600 hover:bg-emerald-50"
-                    }`}
-                  >
-                    {addedIds.has(product.id)
-                      ? <Check className="h-4 w-4" />
-                      : <ShoppingCart className="h-4 w-4" />
-                    }
-                  </button>
                 </div>
               </div>
             ))}

@@ -2,12 +2,10 @@ import { ShoppingBag, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { daysFromNow } from "@/lib/utils";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { ComprarButton } from "@/components/ComprarButton";
+import { RegistrarProductoModal } from "@/components/RegistrarProductoModal";
 
 function getProductStatus(projectedRunOutDate: Date, actualRunOutDate: Date | null) {
   if (actualRunOutDate) return "agotado";
@@ -65,17 +63,13 @@ export default async function InventarioPage() {
             <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
             <p className="text-sm text-gray-500 mt-0.5">Lo que tienes en casa hoy</p>
           </div>
-          <Link href="/checkout">
-            <Button size="sm">+ Registrar compra</Button>
-          </Link>
+          <RegistrarProductoModal />
         </div>
         <div className="flex flex-col items-center justify-center py-24 text-center space-y-3">
           <ShoppingBag className="h-12 w-12 text-gray-200" />
           <p className="text-gray-500 font-medium">Tu inventario está vacío</p>
-          <p className="text-sm text-gray-400">Registra una compra para ver tus productos aquí</p>
-          <Link href="/checkout">
-            <Button size="sm">Registrar primera compra</Button>
-          </Link>
+          <p className="text-sm text-gray-400">Registra lo que tienes hoy en casa</p>
+          <RegistrarProductoModal />
         </div>
       </div>
     );
@@ -88,20 +82,7 @@ export default async function InventarioPage() {
           <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
           <p className="text-sm text-gray-500 mt-0.5">Lo que tienes en casa hoy</p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/carrito">
-            <Button size="sm" variant="outline">
-              <span className="md:hidden">🛒</span>
-              <span className="hidden md:inline">🛒 Lista de compras</span>
-            </Button>
-          </Link>
-          <Link href="/checkout">
-            <Button size="sm">
-              <span className="md:hidden">+ Compra</span>
-              <span className="hidden md:inline">+ Registrar compra</span>
-            </Button>
-          </Link>
-        </div>
+        <RegistrarProductoModal />
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -160,9 +141,6 @@ export default async function InventarioPage() {
                     {status === "agotado" && (
                       <Badge variant="destructive">Agotado</Badge>
                     )}
-                    {status === "agotado" && (
-                      <ComprarButton productId={product.id} />
-                    )}
                   </div>
                 </div>
               );
@@ -170,11 +148,6 @@ export default async function InventarioPage() {
           </CardContent>
         </Card>
       ))}
-
-      <div className="flex items-center gap-2 text-xs text-gray-400">
-        <ShoppingBag className="h-3.5 w-3.5" />
-        <span>Los productos agotados aparecen automáticamente en tu carrito</span>
-      </div>
     </div>
   );
 }
