@@ -1,12 +1,13 @@
 import { ShoppingBag, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { daysFromNow, formatDate } from "@/lib/utils";
+import { daysFromNow } from "@/lib/utils";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { ComprarButton } from "@/components/ComprarButton";
 
 function getProductStatus(projectedRunOutDate: Date, actualRunOutDate: Date | null) {
   if (actualRunOutDate) return "agotado";
@@ -87,9 +88,20 @@ export default async function InventarioPage() {
           <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
           <p className="text-sm text-gray-500 mt-0.5">Lo que tienes en casa hoy</p>
         </div>
-        <Link href="/checkout">
-          <Button size="sm">+ Registrar compra</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/carrito">
+            <Button size="sm" variant="outline">
+              <span className="md:hidden">🛒</span>
+              <span className="hidden md:inline">🛒 Lista de compras</span>
+            </Button>
+          </Link>
+          <Link href="/checkout">
+            <Button size="sm">
+              <span className="md:hidden">+ Compra</span>
+              <span className="hidden md:inline">+ Registrar compra</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -149,11 +161,7 @@ export default async function InventarioPage() {
                       <Badge variant="destructive">Agotado</Badge>
                     )}
                     {status === "agotado" && (
-                      <Link href="/checkout">
-                        <Button size="sm" variant="outline" className="text-xs h-7 px-2">
-                          Comprar
-                        </Button>
-                      </Link>
+                      <ComprarButton productId={product.id} />
                     )}
                   </div>
                 </div>

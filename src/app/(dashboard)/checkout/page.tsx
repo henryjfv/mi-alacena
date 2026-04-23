@@ -31,6 +31,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     fetch("/api/cart")
@@ -53,7 +54,8 @@ export default function CheckoutPage() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    await Promise.all(
+    setSubmitError("");
+    const results = await Promise.all(
       items.map((item) =>
         fetch("/api/purchases", {
           method: "POST",
@@ -68,6 +70,12 @@ export default function CheckoutPage() {
         })
       )
     );
+    const failed = results.filter((r) => !r.ok);
+    if (failed.length > 0) {
+      setSubmitting(false);
+      setSubmitError("Hubo un error al guardar la compra. Intenta de nuevo.");
+      return;
+    }
     await Promise.all(items.map((item) => fetch(`/api/cart?id=${item.id}`, { method: "DELETE" })));
     setSubmitting(false);
     setSubmitted(true);
@@ -186,6 +194,7 @@ export default function CheckoutPage() {
               ${totalSpend.toLocaleString("es-CO")} COP
             </span>
           </div>
+          {submitError && <p className="text-sm text-red-500 mb-3">{submitError}</p>}
           <Button className="w-full" size="lg" onClick={handleSubmit} disabled={submitting}>
             {submitting ? "Guardando..." : "Confirmar compra"}
           </Button>

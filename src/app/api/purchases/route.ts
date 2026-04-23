@@ -34,8 +34,8 @@ export async function POST(req: Request) {
 
   const { productId, purchaseDate, price, quantity, estimatedDurationDays } = await req.json();
 
-  if (!productId || !price) {
-    return NextResponse.json({ error: "Producto y precio son requeridos" }, { status: 400 });
+  if (!productId) {
+    return NextResponse.json({ error: "Producto es requerido" }, { status: 400 });
   }
 
   const pDate = purchaseDate ? new Date(purchaseDate) : new Date();
