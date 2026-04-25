@@ -63,6 +63,7 @@ export function RegistrarProductoModal() {
         productId,
         purchaseDate,
         price: parseFloat(price) || 0,
+        quantity: 1,
         estimatedDurationDays: duration,
       }),
     });
