@@ -34,20 +34,46 @@ export async function POST(req: Request) {
 
   const { productId, purchaseDate, price, quantity, estimatedDurationDays } = await req.json();
 
-  if (!productId) {
+  if (typeof productId !== "string" || !productId.trim()) {
     return NextResponse.json({ error: "Producto es requerido" }, { status: 400 });
   }
 
+  const product = await prisma.product.findFirst({
+    where: { id: productId, userId: session.user.id },
+    select: { id: true },
+  });
+
+  if (!product) {
+    return NextResponse.json({ error: "El producto no existe o no te pertenece" }, { status: 403 });
+  }
+
   const pDate = purchaseDate ? new Date(purchaseDate) : new Date();
-  const projectedRunOutDate = addDays(pDate, estimatedDurationDays || 30);
+  if (Number.isNaN(pDate.getTime())) {
+    return NextResponse.json({ error: "Fecha de compra inválida" }, { status: 400 });
+  }
+
+  const requestedQuantity = Number(quantity);
+  if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+    return NextResponse.json({ error: "Cantidad inválida" }, { status: 400 });
+  }
+
+  const requestedDuration = Number(estimatedDurationDays);
+  const safeDuration = Number.isInteger(requestedDuration) && requestedDuration > 0 ? requestedDuration : 30;
+
+  const requestedPrice = Number(price);
+  if (Number.isNaN(requestedPrice) || requestedPrice < 0) {
+    return NextResponse.json({ error: "Precio inválido" }, { status: 400 });
+  }
+
+  const projectedRunOutDate = addDays(pDate, safeDuration);
 
   const purchase = await prisma.purchase.create({
     data: {
-      productId,
+      productId: product.id,
       purchaseDate: pDate,
-      price,
-      quantity: quantity || 1,
-      estimatedDurationDays: estimatedDurationDays || 30,
+      price: requestedPrice,
+      quantity: requestedQuantity,
+      estimatedDurationDays: safeDuration,
       projectedRunOutDate,
       userId: session.user.id,
     },
